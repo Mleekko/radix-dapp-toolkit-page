@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Radix dApp Toolkit Page</title>
+    <script type="application/javascript" src="radix-dapp-toolkit.bundle.umd.cjs"></script>
+    <script>
+        let RDT = window.RDT;
+
+        const dAppId = 'account_tdx_2_12ys5dcytt0hc0yhq5a78stl7upchljsvs36ujdunlszlrgu90mz44d'
+        // Instantiate DappToolkit
+        const rdt = RDT.RadixDappToolkit({
+            dAppDefinitionAddress: dAppId,
+            networkId: RDT.RadixNetwork.Stokenet, // network ID 2 is for the stokenet test network 1 is for mainnet
+            applicationName: 'Radix Gumball dApp',
+            applicationVersion: '1.0.0',
+            useCache: false,
+        })
+
+        console.log("dApp Toolkit: ", rdt)
+
+        rdt.walletApi.setRequestData(RDT.DataRequestBuilder.accounts().atLeast(1))
+
+        rdt.walletApi.provideChallengeGenerator(async () =>
+            Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('hex')
+        )
+
+        // Subscribe to updates to the user's shared wallet data
+        rdt.walletApi.walletData$.subscribe((walletData) => {
+            console.log("subscription wallet data: ", walletData)
+            if (walletData.accounts && walletData.accounts.length) {
+                document.getElementById('accountName').value = walletData.accounts[0].label
+                document.getElementById('accountAddress').value = walletData.accounts[0].address
+            }
+        })
+
+        console.log("Initialized!")
+    </script>
+</head>
+<body>
+
+    <div style="width: 100%; text-align: center">
+        <div style="margin: auto;">
+            <div style="margin-bottom: 10px;">
+                <label for="accountName">Account Name:</label>
+                <input id="accountName" type="text" style="width: 450px;" disabled="disabled">
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label for="accountAddress">Address:</label>
+                <input id="accountAddress" style="width: 450px;" type="text" disabled="disabled">
+            </div>
+            <span style="margin-bottom: 10px;">
+                <radix-connect-button></radix-connect-button>
+            </span>
+        </div>
+    </div>
+</body>
+</html>
